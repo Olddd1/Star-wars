@@ -119,21 +119,19 @@ def restart():
     global gun, bullets, ufos, k, move_right, move_left, last_step, score, record
 
     try:
-        f = open('data/data.txt', 'r+')
-        f.write(str(round(record)))
-    except Exception:
-        pass
-    f.close()
+        with open('data/data.txt', 'w+') as f:
+            f.write(str(round(record)))
+    except Exception as e:
+        print(e)
 
-    try:
-        f = open('data/data.txt', 'r+')
-        data = f.read().split('/n')
-        record = float(data[0])
-    except Exception:
-        record = 0
-        f.write('0')
-
-    f.close()
+    with open('data/data.txt', 'r+') as f:
+        try:
+            data = f.read().split('/n')
+            record = float(data[0])
+        except Exception as e:
+            record = 0
+            f.write('0')
+            print(e)
 
     end_screen((500, 600), round(score), round(record))
 
@@ -161,7 +159,7 @@ def load_image(name, color_key=None):
         raise SystemExit(message)
     image = image.convert_alpha()
     if color_key is not None:
-        if color_key is -1:
+        if color_key == -1:
             color_key = image.get_at((0, 0))
         image.set_colorkey(color_key)
     return image
@@ -180,8 +178,7 @@ def start_screen(screen_size):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 return
         pygame.display.flip()
         clock.tick(60)
@@ -189,8 +186,8 @@ def start_screen(screen_size):
 
 def end_screen(screen_size, score, record):
     intro_text = [
-        'Счёт: ' + str(score),
-        'Рекорд: ' + str(record),
+        f'Счёт: {score}',
+        f'Рекорд: {record}',
         'Нажмите любую кнопку, чтобы начать заново'
     ]
     fon = pygame.transform.scale(load_image('start_screen.png'), screen_size)
@@ -241,14 +238,15 @@ move_left = False
 last_step = None
 last_len = 35
 score = 0
-try:
-    f = open('data/data.txt', 'r+')
-    data = f.read().split('/n')
-    record = float(data[0])
-except Exception:
-    record = 0
-    f.write('0')
-f.close()
+
+with open('data/data.txt', 'r+') as f:
+    try:
+        data = f.read().split('/n')
+        record = float(data[0])
+    except Exception as e:
+        record = 0
+        f.write('0')
+        print(e)
 
 army_create(screen, ufos, 1)
 
